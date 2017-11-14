@@ -99,15 +99,22 @@
   // Produce a duplicate-free version of the array.
   _.uniq = function(array, isSorted, iterator) {
     var sorted = array;
-    if(!isSorted){
-       sorted = array.sort((a, b) => a - b);
-    }
+    // if (!isSorted) {
+    //   sorted = array.sort((a, b) => a - b);
+    // }
     var result = [];
-    _.each(sorted, function(value, index){
-      if(!result.includes(value)){
+    var iteratorValues = [];
+    var iteratorResult = [];
+    _.each(sorted, function(value, index) {
+      if (typeof iterator === 'function') {
+        iteratorValues.push(iterator(value));
+        if(!iteratorResult.includes(iterator(value))){
+          result.push(value);
+        }
+      }else if (!result.includes(value)) {
         result.push(value);
       }
-    }
+    });
     return result;
   };
 
