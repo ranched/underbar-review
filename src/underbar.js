@@ -103,15 +103,14 @@
     //   sorted = array.sort((a, b) => a - b);
     // }
     var result = [];
-    var iteratorValues = [];
     var iteratorResult = [];
     _.each(sorted, function(value, index) {
       if (typeof iterator === 'function') {
-        iteratorValues.push(iterator(value));
-        if(!iteratorResult.includes(iterator(value))){
+        if (!iteratorResult.includes(iterator(value))) {
+          iteratorResult.push(iterator(value));
           result.push(value);
         }
-      }else if (!result.includes(value)) {
+      } else if (!result.includes(value)) {
         result.push(value);
       }
     });
@@ -124,6 +123,11 @@
     // map() is a useful primitive iteration function that works a lot
     // like each(), but in addition to running the operation on all
     // the members, it also maintains an array of results.
+    var result = [];
+    _.each(collection, function(value) {
+      result.push(iterator(value));
+    });
+    return result;
   };
 
   /*
@@ -165,6 +169,35 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
+    
+    // _.each(collection, function(value, index, collection) {
+    //   if (index === 0 && accumulator === undefined) {
+    //     accumulator = value;
+    //   } else 
+      
+    //   // if (iterator(accumulator, value) === undefined) {
+    //     if (Array.isArray(accumulator)) {
+    //       accumulator.push(iterator(accumulator, value));
+    //     } else if (typeof accumulator === 'object') {
+    //       accumulator[value] = iterator(accumulator, value);
+    //     } else if (typeof accumulator === 'string') {
+    //       accumulator = iterator(accumulator, value);
+    //     } else if (typeof accumulator === 'number') {
+    //       accumulator = iterator(accumulator, value);
+    //     }
+    //   // }
+    // });
+    
+    _.each(collection, function(value, index, collection){
+      if (accumulator === undefined && index === 0) {
+        accumulator = collection[index];
+      } else {
+        accumulator = iterator(accumulator, value);
+      }
+    });
+    
+    return accumulator;
+      
   };
 
   // Determine if the array or object contains a given value (using `===`).
@@ -183,12 +216,47 @@
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
+    return _.reduce(collection, function(passed, value){
+      if(typeof iterator === 'function'){
+        if (passed === false) {
+          return false;
+        } else {
+          return iterator(value) ? true : false;
+        }
+      }else{
+        return value;
+      }
+    }, true);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
+    // if(_.every(collection, iterator)){
+    //   return true;
+    // }
+    // if(!_.every(collection, function(){return !iterator}) && ){
+    //   return true;
+    // }else{
+    //   return false;
+    // }
+    return _.reduce(collection, function(passed, value){
+      if(typeof iterator === 'function'){
+        if (passed === true) {
+          return true ;
+        } else {
+          return iterator(value) ? true : false;
+        }
+      }else{
+        if(passed === true){
+          return true;
+        }else{
+          return value;
+        }
+      }
+    }, false);
+    
   };
 
 
@@ -211,11 +279,25 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+    _.each(arguments, function(value){
+      for(var key in value){
+        obj[key] = value[key];
+      }
+    });
+    return obj;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+    _.each(arguments, function(value){
+      for(var key in value){
+        if(obj[key] === undefined){
+          obj[key] = value[key];  
+        }
+      }
+    });
+    return obj;
   };
 
 
